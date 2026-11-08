@@ -1,54 +1,26 @@
 # speak-low
 
-<img src="Resources/Brand/speak-low.svg" alt="小小惊叹气泡与手写的 speak anything 字标" width="400">
+<img src="Resources/Brand/speak-low.svg" width="280" alt="小小惊叹气泡与 speak anything 字标">
 
-macOS 本地语音输入工具，支持右 Option 一键听写和可选的 Claude 文字整理。
+Mac 上的离线语音输入。把光标放进输入框，按一下右侧 **Option（⌥）** 开始说话，再按一下，把文字写回光标。按 **Esc** 取消。
 
-点进可编辑的输入框，单按右侧 Option（⌥）开始说话，再按一次结束。文字会写入开始听写时的光标位置。Esc 取消。右 Option 配合方向键、字母或其他修饰键时，组合键照常工作。
+<img src="docs/images/recording.png" width="148" alt="录音时屏幕底部出现气泡和计时器">
 
-## 在 Mac 上使用
+## 安装
 
-1. 将构建好的 **speak-low.app** 放入「应用程序」并打开。
-2. 在设置里开启「麦克风」和「辅助功能」。从系统设置返回后，App 会自动检查授权。若出现「输入监控」一项，跟随该项提示操作。
-3. 等待本地模型就绪。首次启动时，Core ML 需要为芯片编译模型，可能需要一两分钟。菜单栏的波形图标可以打开设置、开始或结束听写、复制上次结果和退出。
-4. 把光标放回目标 App。第一次按右 ⌥ 时底部会出现「录音中」指示条，第二次按下后先显示「正在转写」，随后写入文字。需要发送时请自己按发送。
-5. 默认按普通话识别，支持中文里夹英文。整句英文可在设置里选 English，中英文轮流整句输入可选「自动识别」。
+需要 Apple Silicon Mac、macOS 14+、Swift 5.10+ 和 Python 3.8+。在仓库根目录运行：
 
-输入焦点、窗口或可读取的选区改变时，App 会保留结果供手动复制。遇到密码框、目标程序没有提供可识别的编辑控件，或不能确认焦点时，也可使用菜单栏的「复制上次结果」。上次结果在内存中保留至下一次成功听写或退出。个别编辑器只能接受粘贴，App 会临时使用剪贴板，并在剪贴板仍属于这次听写时恢复此前的内容。
+```sh
+./scripts/build-app.sh
+open dist/speak-low.app
+```
+
+首次构建会下载 Whisper 模型。打开 App，允许「麦克风」和「辅助功能」，等模型就绪即可听写。菜单栏的气泡可以打开设置，也可以在文字未写入时复制上次结果。
+
+<img src="docs/images/settings.png" width="400" alt="speak-low 设置窗口，可选择识别语言并开启听写权限">
 
 ## 可选的 Claude 整理
 
-在设置中输入 Anthropic API Key，确认模型 ID，打开「Claude 文字整理」。密钥保存到 macOS 钥匙串，可随时移除。默认模型为 `claude-haiku-5-5`，可以改为 API 账户可用的其他 Claude 模型。
+在设置里填入自己的 Anthropic API Key 和模型 ID，保存后开启「启用文字整理」。Claude 可以合并断词、补标点。仅转写文字会发给 Anthropic，费用由你的 API 账户承担，调用失败时使用本地稿。
 
-开启后，App 直接向 Anthropic Messages API 发送本次听写的文字，请求合并断词、补标点和删除明显的口吃重复。调用由用户自己的 API 账户计费。网络错误、无效密钥、截断或空结果都会回退到本地稿。人名、缩写和有歧义的同音词可能需要手动修正。
-
-## 本地识别
-
-Swift / AppKit / SwiftUI，WhisperKit 1.1.1，Core ML 模型为 `large-v3-v20240930_626MB`。应用包已内置模型和词表，听写可在没有网络连接时运行。录音会写入 macOS 临时目录，完成、取消或正常退出后清理。App 不需要账户、Vercel 服务或本地后台服务器。
-
-## 从源码构建
-
-需要 Apple Silicon、macOS 14 或更新版本、Swift 5.10 或更新版本的开发工具、Python 3.8+ 和 curl。构建与运行已在 macOS 26.6.2、Apple M5 Pro、Swift 6.2.3 上验证。重新构建时需要网络拉取 Swift 依赖和模型文件。
-
-~~~sh
-./scripts/test.sh
-./scripts/build-app.sh
-open "dist/speak-low.app"
-~~~
-
-构建脚本按固定版本下载模型和 tokenizer，验证各文件摘要，再把音频模型与词表一并签入应用包。默认使用本机 ad-hoc 签名。本地重新编译可能需要重新授予辅助功能权限。可设置环境变量 `SPEAK_LOW_MODEL_CACHE` 复用模型目录，`SPEAK_LOW_SIGN_IDENTITY` 指定签名身份。
-
-命令行可用相同引擎转写已有录音，逐个打印识别文字和模型就绪后的处理耗时。
-
-~~~sh
-"dist/speak-low.app/Contents/MacOS/speak-low" --transcribe --language auto recording.wav
-~~~
-
-## 验证记录
-
-- 网络被禁用的进程中，随包模型完成了普通话、中英混说与英文合成录音转写。默认中文模式中，4.5 秒普通话样例用时 1.40 秒，约 5.6 秒的中英混说样例用时 0.86 秒。计时从读取音频到产出文字，未计入首次模型载入、录音或云端整理。纯静音样例返回了「没有听到语音」。
-- 中英混说样例中，英文语音清楚念出 Q、A 时保留为 QA；中文合成语音连读同一缩写时错识为「靠」。这组样例不足以估计真实口述的识别率。
-- 使用项目的实际快捷键监听器向系统发送「单按、Option + 左方向键、单按」，触发次数为 2。文本编辑验证了光标写入和光标移动时取消写入。独立 Chrome 测试窗口验证了 textarea 的内容和 DOM input 事件。
-- 自动检查覆盖 Claude 成功响应、无效密钥及输出被截断。Claude 响应使用模拟数据验证。
-
-第三方许可见 `Resources/Licenses/`。模型文件清单与摘要见 `Resources/model-files.tsv`。
+<img src="docs/images/claude-model.png" width="400" alt="浅色模式下的 Claude 设置，模型 ID 使用中性灰选中高亮">

@@ -286,9 +286,9 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, Obse
         phase = value
         message = description
         guard let button = item?.button else { return }
-        let symbol = value == .recording ? "record.circle.fill" : "waveform"
-        button.image = NSImage(systemSymbolName: symbol, accessibilityDescription: "speak-low")
-        button.contentTintColor = value == .recording ? .systemRed : nil
+        button.image = value == .recording
+            ? NSImage(systemSymbolName: "record.circle.fill", accessibilityDescription: "speak-low 录音中")
+            : Brand.mascot
         button.toolTip = "speak-low · \(description)"
     }
 }
