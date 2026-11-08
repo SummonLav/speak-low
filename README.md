@@ -1,5 +1,7 @@
 # speak-low
 
+<img src="Resources/Brand/speak-low.svg" alt="小小惊叹气泡与手写的 speak anything 字标" width="400">
+
 macOS 本地语音输入工具，支持右 Option 一键听写和可选的 Claude 文字整理。
 
 点进可编辑的输入框，单按右侧 Option（⌥）开始说话，再按一次结束。文字会写入开始听写时的光标位置。Esc 取消。右 Option 配合方向键、字母或其他修饰键时，组合键照常工作。
