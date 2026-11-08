@@ -1,9 +1,10 @@
 <h1 align="center">speak low</h1>
 
-<img src="Resources/Brand/speak-low.svg" width="140" height="60" alt="speak anything"><br>
-Mac 本地听写工具，轻按右侧 Option 键，把说的话写到光标处。
+<p align="center">
+  <img src="Resources/Brand/speak-low.svg" width="140" height="60" align="middle" alt="speak anything">&ensp;Mac 本地听写工具，轻按右侧 Option 键，把说的话写到光标处。
+</p>
 
-## Skill · 安装与更新
+## 安装与更新
 
 收到安装或更新请求时，由 agent 在目标 Mac 上执行以下步骤并打开 App。先检查 `/Applications` 和 `~/Applications` 中的 `speak-low.app`。已有安装走原位更新。若 App 正从其他位置运行，使用该副本的实际路径。
 
