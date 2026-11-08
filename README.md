@@ -2,7 +2,7 @@
 
 <img src="Resources/Brand/speak-low.svg" width="280" alt="小小惊叹气泡与 speak anything 字标">
 
-Mac 上的离线语音输入。把光标放进输入框，按一下右侧 **Option（⌥）** 开始说话，再按一下，把文字写回光标。按 **Esc** 取消。开始录音时会听到轻快的上行双音，结束时是下行双音。
+Mac 上的离线语音输入。把光标放进输入框，按一下右侧 **Option（⌥）** 开始说话，再按一下，把文字写回光标。按 **Esc** 取消。开始时会听到两声轻柔上扬的尼龙弦拨音，结束时音调落低。
 
 <img src="docs/images/recording.png" width="148" alt="录音时屏幕底部出现气泡和计时器">
 
