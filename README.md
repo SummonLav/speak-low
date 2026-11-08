@@ -25,6 +25,6 @@ open /Applications/speak-low.app
 
 ## 可选的 Claude 整理
 
-在设置里填入自己的 Anthropic API Key 和模型 ID，保存后开启「启用文字整理」。Claude 可以合并断词、补标点。仅转写文字会发给 Anthropic，费用由你的 API 账户承担，调用失败时使用本地稿。
+在设置里粘贴自己的 Anthropic API Key，保存后开启「启用文字整理」。默认使用 Claude Sonnet 4.5，可修改模型 ID。Claude 可以合并断词、补标点。仅转写文字会发给 Anthropic，费用由你的 API 账户承担，调用失败时使用本地稿。
 
 <img src="docs/images/claude-model.png" width="400" alt="浅色模式下的 Claude 设置，模型 ID 使用中性灰选中高亮">

@@ -148,7 +148,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, Obse
     @objc func showSettings() {
         if settings == nil {
             let controller = NSHostingController(rootView: SettingsView(app: self))
-            let window = NSWindow(contentViewController: controller)
+            let window = SettingsWindow(contentViewController: controller)
             window.title = "speak-low 设置"
             window.styleMask = [.titled, .closable, .miniaturizable]
             window.isReleasedWhenClosed = false

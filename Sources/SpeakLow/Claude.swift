@@ -42,7 +42,7 @@ private final class NoRedirect: NSObject, URLSessionTaskDelegate {
 }
 
 enum Claude {
-    static let defaultModel = "claude-haiku-5-5"
+    static let defaultModel = "claude-sonnet-4-5"
     private static let session: URLSession = {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 8
