@@ -1,0 +1,5 @@
+Core ML speech model: argmaxinc/whisperkit-coreml (MIT)
+https://huggingface.co/argmaxinc/whisperkit-coreml
+Tokenizer: openai/whisper-large-v3 (Apache License 2.0)
+https://huggingface.co/openai/whisper-large-v3
+Pinned revisions and file digests are recorded in Resources/model-files.tsv in the source project.

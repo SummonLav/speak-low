@@ -1,0 +1,5 @@
+.build/
+.model-cache/
+dist/
+.swiftpm/
+.DS_Store
