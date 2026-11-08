@@ -114,33 +114,65 @@
     }
     return group(`translate(${x} ${y}) scale(${width/advance})`,shapes);
   }
-  const facePaths={
-    smile:'M16 2C43 -2 82 0 103 3C118 6 122 19 120 38L115 69C112 88 102 95 85 95L58 95C47 95 38 109 30 110C24 110 31 95 22 94C7 93 1 85 1 69L0 26C0 13 4 5 16 2Z',
-    gasp:'M21 0L92 3C109 4 116 12 118 28L123 76C124 92 113 100 97 98L68 95C58 95 53 89 45 94L27 105C19 108 26 94 18 92C5 88 -1 83 0 68L3 23Q5 3 21 0Z',
-    hum:'M0 23Q0 4 18 4L49 5C67 6 70 -1 85 0L100 2Q117 4 118 21L120 71Q119 87 102 89L97 90Q94 91 96 102Q95 110 85 102L70 91L19 91Q0 91 0 72Z'
-  };
-  function face(mood,fill,features,outline) {
+  const bubbles=window.SpeakLowBubbles;
+  function face(mood,fill,features,outline,changes) {
+    const settings=changes?.[mood] ?? bubbles.defaults(mood);
+    const contour=bubbles.geometry(mood,settings);
     const border=outline?'stroke="'+outline+'" stroke-width="2.4" stroke-linejoin="round"':'';
-    const base=path(facePaths[mood],fill,border);
-    if(mood==='smile') return base + line('M60 42L60 49M78 40L78 47',6.2,features) + line('M58 61Q70 68 82 56',5.1,features);
-    if(mood==='gasp') return base + line('M47 42L46 48M64 44L63 50',6.2,features) +
+    const silhouette=path(contour.path,fill,border+' transform="'+contour.scale+'" data-contour="'+mood+'"');
+    const drawing=silhouette+expression(mood,fill,features);
+    return '<g data-frame="'+mood+'" transform="rotate('+settings.angle+' 60 54)">'+drawing+'</g>';
+  }
+  function expression(mood,fill,features) {
+    if(mood==='smile') return line('M60 42L60 49M78 40L78 47',6.2,features) + line('M58 61Q70 68 82 56',5.1,features);
+    if(mood==='gasp') return line('M47 42L46 48M64 44L63 50',6.2,features) +
       path('M53 55C69 55 67 72 54 72C39 72 39 55 53 55Z',features) + path('M53 60C60 59 62 66 55 67C48 67 47 61 53 60Z',fill);
-    return base + line('M39 40Q43 47 48 40M58 39Q62 46 67 39',4.8,features) + line('M45 55Q52 62 61 54',4.3,features);
+    return line('M39 40Q43 47 48 40M58 39Q62 46 67 39',4.8,features) + line('M45 55Q52 62 61 54',4.3,features);
   }
-  function drawMascot(id,dark=false) {
+  function drawMascot(id,dark=false,changes) {
     const solid=dark?paper:ink, cut=dark?ink:paper;
-    if (id==='side-smile') return face('smile',solid,cut);
-    if (id==='blue-note') return group('rotate(-7 60 54)',face('gasp',paper,ink,dark?null:ink));
-    return group('translate(0 1) rotate(-7 50 50) scale(.79)',face('hum',paper,ink,ink)) +
-      group('translate(51 35) rotate(9 52 45) scale(.74)',face('smile',ink,paper,paper));
+    if (id==='side-smile') return face('smile',solid,cut,null,changes);
+    if (id==='blue-note') return face('gasp',paper,ink,dark?null:ink,changes);
+    return group('translate(0 1) rotate(-7 50 50) scale(.79)',face('hum',paper,ink,ink,changes)) +
+      group('translate(51 35) rotate(9 52 45) scale(.74)',face('smile',ink,paper,paper,changes));
   }
-  function faceLockup(id,word,dark=false) {
-    const color=dark?paper:ink;
-    const isPair=id==='double-talk';
-    const icon=group(`translate(${isPair?99:96} ${isPair?135:139}) scale(${isPair?1.48:1.52})`,drawMascot(id,dark));
-    const x=isPair?331:315;
-    if(word==='speak anything') return icon+wordmark('speak',x,144,164,color)+wordmark('anything',x,207,255,color);
-    return icon+wordmark('speak-low',x,185,300,color);
+  // Measure the actual Bézier extrema and rotations once per edited shape.
+  // The resulting spacing and crop are shared by every preview and the SVG file.
+  let meter;
+  const faceLayoutCache=new Map();
+  function measure(markup) {
+    if(!meter){
+      meter=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      meter.setAttribute('aria-hidden','true');
+      meter.style.cssText='position:fixed;left:-5000px;top:0;width:1px;height:1px;visibility:hidden;pointer-events:none';
+      document.body.append(meter);
+    }
+    meter.innerHTML='<g>'+markup+'</g>';
+    const {x,y,width,height}=meter.firstElementChild.getBBox();
+    return {x,y,width,height};
+  }
+  function faceLayout(id,word,dark,changes) {
+    const slot=id+'|'+word+'|'+dark;
+    const key=JSON.stringify(changes||{});
+    if(faceLayoutCache.get(slot)?.key===key) return faceLayoutCache.get(slot);
+    const color=dark?paper:ink, isPair=id==='double-talk';
+    const symbol=drawMascot(id,dark,changes);
+    const bounds=measure(symbol);
+    const scale=isPair?1.48:1.52, left=isPair?99:96, top=isPair?135:139;
+    const wordX=isPair?331:315;
+    const shift=Math.max(0,left+(bounds.x+bounds.width)*scale+24-wordX);
+    const icon=group('translate('+left+' '+top+') scale('+scale+')',symbol);
+    const words=word==='speak anything'?
+      wordmark('speak',wordX+shift,144,164,color)+wordmark('anything',wordX+shift,207,255,color):
+      wordmark('speak-low',wordX+shift,185,300,color);
+    const art=group('translate('+(-shift/2)+' 0)',icon+words);
+    const box=measure(art);
+    const view=[box.x-9,box.y-9,box.width+18,box.height+18];
+    const iconSide=Math.max(bounds.width,bounds.height)+12;
+    const iconView=[bounds.x+(bounds.width-iconSide)/2,bounds.y+(bounds.height-iconSide)/2,iconSide,iconSide];
+    const layout={key,art,symbol,view,iconView};
+    faceLayoutCache.set(slot,layout);
+    return layout;
   }
 
   const designs=[
@@ -151,12 +183,13 @@
     {id:'blue-note',name:'小小惊叹',english:'Little Oh',family:'face',board:'#202020',reverse:true,palette:['#202020',paper,ink],note:'黑底上留出一只白色气泡，圆嘴微张。',bounds:[79,120,548,200]},
     {id:'double-talk',name:'一起说',english:'Double Talk',family:'face',board:'#d1d1d1',palette:['#d1d1d1',paper,ink],note:'两只气泡一前一后，把一句话接成对话。',bounds:[87,127,559,196]}
   ];
-  function svg(design,{kind='board',word='speak-low',dark=Boolean(design.reverse)}={}) {
+  function svg(design,{kind='board',word='speak-low',dark=Boolean(design.reverse),changes}={}) {
     const uid='sl'+(++serial);
     const type=design.family==='type';
     const onBoard=kind==='board'||kind==='thumb';
-    const art=type?design.draw():faceLockup(design.id,word,onBoard?Boolean(design.reverse):dark);
-    const view=kind==='icon'?(type?design.bounds:[-8,-13,152,151]):kind==='logo'?design.bounds:[0,0,720,440];
+    const layout=type?null:faceLayout(design.id,word,onBoard?Boolean(design.reverse):dark,changes);
+    const art=type?design.draw():layout.art;
+    const view=kind==='icon'?(type?design.bounds:layout.iconView):kind==='logo'?(type?design.bounds:layout.view):[0,0,720,440];
     const pattern=`<pattern id="${uid}g" patternUnits="userSpaceOnUse" width="143" height="143"><image width="143" height="143" href="${texture}"/></pattern>`;
     const plate=onBoard?`<rect width="720" height="440" fill="${design.board}"/>`:'';
     const silhouette=({'paper-chatter':chatterBubble,'off-register':cutBubble,orbital:orbitBubble})[design.id];
@@ -164,7 +197,7 @@
     const grain=type && kind!=='icon';
     const textureLayer=grain ? '<rect width="720" height="440" fill="url(#'+uid+'g)" opacity=".67"'+
       (clipping?' clip-path="url(#'+uid+'c)"':'')+' pointer-events="none"/>' : '';
-    const shape=kind==='icon'&&!type?drawMascot(design.id,dark):art;
+    const shape=kind==='icon'&&!type?layout.symbol:art;
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${view.join(' ')}" role="img" aria-label="${design.name} · ${type?'speak anything':word}" preserveAspectRatio="xMidYMid ${kind==='thumb'?'slice':'meet'}"><title>${design.english} — ${type?'speak anything':word}</title>${textureLayer?'<defs>'+pattern+clipping+'</defs>':''}${plate}${shape}${textureLayer}</svg>`;
   }
   window.SpeakLowMarks=Object.freeze({designs,svg});

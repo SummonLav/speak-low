@@ -7,7 +7,7 @@
 <title>Logo Playground · speak-low</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath fill='%23191919' d='M3 10Q3 4 10 4h20q7 0 7 7v14q0 6-7 6H17l-9 6 1-6q-6 0-6-7z'/%3E%3Cpath d='M15 14v2m10-2v2m-11 5q6 6 12-1' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="playground.css">
-<script defer src="marks.js"></script><script defer src="playground.js"></script>
+<script defer src="bubble-shapes.js"></script><script defer src="marks.js"></script><script defer src="shape-editor.js"></script><script defer src="playground.js"></script>
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" class="icon-bank" aria-hidden="true">
@@ -36,16 +36,27 @@
   <div class="workspace">
     <section class="selected" aria-label="当前标识预览">
       <div class="section-head"><h2><span class="live-dot" aria-hidden="true"></span>当前预览</h2><span id="family" class="family-label"></span></div>
-      <figure id="plate" class="plate"><div id="drawing"></div><i class="crop tl"></i><i class="crop tr"></i><i class="crop bl"></i><i class="crop br"></i></figure>
+      <figure id="plate" class="plate"><div id="drawing"></div><svg id="handles" viewBox="0 0 720 440" aria-hidden="true" hidden>
+        <path id="handle-box" class="handle-guide"/><g data-handle="size"><circle r="15" class="handle-hit"/><rect x="-4.5" y="-4.5" width="9" height="9" rx="1"/></g>
+        <g data-handle="tail"><circle r="16" class="handle-hit"/><circle r="5"/></g>
+      </svg><i class="crop tl"></i><i class="crop tr"></i><i class="crop bl"></i><i class="crop br"></i></figure>
+      <p id="handle-hint" hidden>拖动方块改宽高，拖动圆点移动或拉长尾巴。</p>
       <div class="caption">
         <div class="caption-text" aria-live="polite"><div class="names"><h3 id="name"></h3><em id="english"></em></div><p id="note"></p></div>
         <div class="navigation"><button class="round" id="previous" type="button" aria-label="上一个提案"><svg class="icon"><use href="#i-left"/></svg></button><span class="counter" id="counter"></span><button class="round" id="next" type="button" aria-label="下一个提案"><svg class="icon"><use href="#i-right"/></svg></button></div>
       </div>
       <fieldset id="copy-options" hidden><legend>气泡旁的字标</legend><div class="word-picker"><button type="button" data-word="speak-low">speak-low</button><button type="button" data-word="speak anything">speak anything</button></div></fieldset>
     </section>
-    <aside class="collection" aria-label="提案目录">
-      <div class="section-head catalog-head"><h2>提案目录</h2><div class="filters" aria-label="按系列筛选"><button data-filter="all" aria-pressed="true">全部</button><button data-filter="type" aria-pressed="false">字形</button><button data-filter="face" aria-pressed="false">表情</button></div></div>
+    <aside class="collection" aria-label="标识设计工作区">
+      <div class="section-head catalog-head"><div class="work-modes" role="group" aria-label="工作区"><button type="button" data-mode="catalog" aria-pressed="true">提案目录</button><button type="button" data-mode="shape" aria-pressed="false">调节气泡</button></div><div class="filters" aria-label="按系列筛选"><button data-filter="all" aria-pressed="true">全部</button><button data-filter="type" aria-pressed="false">字形</button><button data-filter="face" aria-pressed="false">表情</button></div></div>
       <div id="catalog" class="catalog"></div>
+      <section id="shape-panel" aria-label="气泡形状编辑器" hidden>
+        <div class="shape-top"><h2>表情气泡</h2><button id="reset-shape" type="button" disabled>恢复原形</button></div>
+        <div id="face-picker" class="face-picker" role="group" aria-label="选择表情提案"></div>
+        <div id="layer-picker" hidden><span>编辑对象</span><div class="word-picker" role="group" aria-label="选择气泡图层"><button type="button" data-layer="smile">前气泡</button><button type="button" data-layer="hum">后气泡</button></div></div>
+        <fieldset class="shape-fields"><legend>轮廓</legend><div id="body-fields" class="range-grid"></div></fieldset>
+        <fieldset class="shape-fields"><legend>尾巴</legend><div id="tail-fields" class="range-grid"></div></fieldset>
+      </section>
     </aside>
   </div>
   <section class="proofs" aria-label="实际尺寸与标识组合">
