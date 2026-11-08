@@ -130,6 +130,8 @@ struct SettingsView: View {
             .formStyle(.grouped)
             .scrollContentBackground(.hidden)
             Divider()
+            UpdateRow(updater: app.updater, action: app.checkForUpdates)
+            Divider()
             HStack(spacing: 10) {
                 Button("移除密钥", action: remove)
                 Spacer()
@@ -140,7 +142,7 @@ struct SettingsView: View {
         }
         .tint(.gray)
         .background(Color(nsColor: .windowBackgroundColor))
-        .frame(width: 510, height: 570)
+        .frame(width: 510, height: 624)
         .onAppear { model = storedModel; key = ""; feedback = ""; app.refreshAccess() }
     }
 
@@ -195,5 +197,26 @@ struct SettingsView: View {
             enabled = false
             feedback = "已移除"
         } catch { feedback = error.localizedDescription }
+    }
+}
+
+private struct UpdateRow: View {
+    @ObservedObject var updater: AppUpdate
+    let action: () -> Void
+
+    var body: some View {
+        HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("speak-low " + updater.version).font(.subheadline.weight(.medium))
+                if !updater.status.isEmpty {
+                    Text(updater.status).font(.caption).foregroundStyle(.secondary)
+                        .lineLimit(2).textSelection(.enabled).help(updater.status)
+                }
+            }
+            Spacer()
+            if updater.busy { ProgressView().controlSize(.small) }
+            Button("检查更新", action: action).disabled(updater.busy)
+        }
+        .padding(.horizontal, 20).frame(minHeight: 48)
     }
 }

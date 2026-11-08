@@ -13,6 +13,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, Obse
     @Published private(set) var hasAccess = false
     @Published private(set) var hasMic = false
     @Published private(set) var hasShortcut = false
+    let updater = AppUpdate()
     private let engine = SpeechEngine()
     private let mic = Microphone()
     private let sounds = DictationSounds()
@@ -50,7 +51,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, Obse
                                                          name: NSWorkspace.didActivateApplicationNotification, object: nil)
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleeping),
                                                          name: NSWorkspace.willSleepNotification, object: nil)
-        if !hasAccess || !hasMic { showSettings() }
+        if !hasAccess || !hasMic || !updater.status.isEmpty { showSettings() }
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -156,6 +157,13 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, Obse
         }
         NSApp.activate(ignoringOtherApps: true)
         settings?.makeKeyAndOrderFront(nil)
+    }
+
+    func checkForUpdates() {
+        updater.start { [weak self] in
+            guard let self else { return false }
+            return phase == .idle || phase == .unavailable || phase == .loading
+        }
     }
 
     @objc private func quit() { NSApp.terminate(nil) }
