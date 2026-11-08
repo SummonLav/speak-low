@@ -1,8 +1,7 @@
 <h1 align="center">speak low</h1>
 
-<p align="center">
-  <img src="Resources/Brand/speak-low.svg" width="140" height="60" align="middle" alt="speak anything">&ensp;Mac 本地听写工具，轻按右侧 Option 键，把说的话写到光标处。
-</p>
+<p align="center"><img src="Resources/Brand/speak-low.svg" width="84" height="36" alt="speak anything"><br>
+Mac 本地听写工具，轻按右侧 Option 键，把说的话写到光标处。</p>
 
 ## 安装与更新
 
