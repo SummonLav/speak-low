@@ -1,8 +1,7 @@
-# <img src="Resources/Brand/speak-low.svg" width="250" alt="speak-low · speak anything">
+# speak low
 
-speak-low 是一款 Mac 本地听写工具，按右侧 Option 键就能把说的话转成文字，写到光标处。
-
-<img src="docs/images/settings.png" width="320" alt="带有 speak anything 标志的深色听写设置窗口">
+<img src="Resources/Brand/speak-low.svg" width="140" height="60" alt="speak anything"><br>
+Mac 本地听写工具，轻按右侧 Option 键，把说的话写到光标处。
 
 ## Skill · 安装与更新
 
@@ -49,3 +48,5 @@ app=/Applications/speak-low.app
 默认由本机 Whisper 离线转写。可选的 Claude 整理会合并断词、补标点。在设置中填入 Anthropic API Key、保存并开启「启用文字整理」。默认使用 Sonnet 4.5，仅发送转写文字，按该账户计费。调用失败时使用本地稿。
 
 <img src="docs/images/recording.png" width="148" alt="听写计时气泡">
+
+<img src="docs/images/settings.png" width="320" alt="深色听写设置窗口">
