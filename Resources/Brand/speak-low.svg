@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="240" viewBox="46 100 560 240" role="img" aria-labelledby="title">
+  <title id="title">speak-low · 小小惊叹 · speak anything</title>
+  <rect x="46" y="100" width="560" height="240" rx="14" fill="#202020"/>
+  <g transform="translate(96 139) scale(1.52)" id="little-oh">
+    <g transform="rotate(-7 60 54)">
+      <path fill="#fafafa" d="M21 0L92 3C109 4 116 12 118 28L123 76C124 92 113 100 97 98L76.12 96.414C66.12 95.609 61.12 88.542 53.12 94.607L35.12 107.957C27.12 111.642 34.12 94.881 26.12 92.617L18 92C5 88 -1 83 0 68L3 23Q5 3 21 0Z" transform="translate(60 47) scale(0.96 0.89) translate(-60 -47)"/>
+      <path d="M47 42L46 48M64 44L63 50" fill="none" stroke="#191919" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path fill="#191919" d="M53 55C69 55 67 72 54 72C39 72 39 55 53 55Z"/>
+      <path fill="#fafafa" d="M53 60C60 59 62 66 55 67C48 67 47 61 53 60Z"/>
+    </g>
+  </g>
+  <g id="speak-anything">
+    <g transform="translate(315 144) scale(0.9534883720930233)">
+      <g transform="translate(0 0)">
+        <path d="M24 15Q17 10 9 14Q0 19 9 24L20 28Q30 34 20 39Q10 43 3 37" fill="none" stroke="#fafafa" stroke-width="6.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(32 0)">
+        <path d="M5 15L5 52M6 25C8 11 28 9 29 24C31 40 12 46 6 33" fill="none" stroke="#fafafa" stroke-width="6.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(68 0)">
+        <path d="M4 27L28 26C28 8 8 9 4 23C-1 38 14 46 27 36" fill="none" stroke="#fafafa" stroke-width="6.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(103 0)">
+        <path d="M27 14L27 39M26 22C22 9 4 11 3 26C2 40 18 46 26 32" fill="none" stroke="#fafafa" stroke-width="6.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(139 0)">
+        <path d="M5 1L5 40M26 14L6 29M16 24L28 39" fill="none" stroke="#fafafa" stroke-width="6.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </g>
+    <g transform="translate(315 207) scale(0.9770114942528736)">
+      <g transform="translate(0 0)">
+        <path d="M27 14L27 39M26 22C22 9 4 11 3 26C2 40 18 46 26 32" fill="none" stroke="#fafafa" stroke-width="6.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(36 0)">
+        <path d="M5 14L5 39M6 24C10 11 28 8 28 24L28 39" fill="none" stroke="#fafafa" stroke-width="6.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(73 0)">
+        <path d="M2 14L15 39M29 14L10 53" fill="none" stroke="#fafafa" stroke-width="6.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(108 0)">
+        <path d="M10 5L10 32Q10 42 20 38M3 16L20 15" fill="none" stroke="#fafafa" stroke-width="6.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(134 0)">
+        <path d="M5 1L5 40M6 24C10 11 28 8 28 24L28 39" fill="none" stroke="#fafafa" stroke-width="6.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(171 0)">
+        <path d="M6 16L6 39M6 4L6 5" fill="none" stroke="#fafafa" stroke-width="6.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(187 0)">
+        <path d="M5 14L5 39M6 24C10 11 28 8 28 24L28 39" fill="none" stroke="#fafafa" stroke-width="6.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <g transform="translate(224 0)">
+        <path d="M27 14L27 39Q26 58 7 50M26 22C22 9 4 11 3 26C2 40 18 45 26 32" fill="none" stroke="#fafafa" stroke-width="6.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </g>
+  </g>
+</svg>
