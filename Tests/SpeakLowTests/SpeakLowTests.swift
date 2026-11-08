@@ -20,6 +20,30 @@ private func interruptedChordDoesNotToggleAndNextTapWorks() {
     precondition(tap.change(rightDown: false, otherModifier: false))
 }
 
+private func confirmsOnlyTheExpectedEdit() {
+    // AX selection offsets are UTF-16, including text before a selected range.
+    let before = InsertionCheck(value: "🍋苹果，苹果", selection: NSRange(location: 2, length: 2), count: nil)
+    func confirmed(_ after: String) -> Bool {
+        before.confirms("青柠", valueAfter: after, caret: nil, countAfter: nil) { _ in nil }
+    }
+    precondition(!confirmed("🍋苹果，苹果"))      // editor ignored the paste
+    precondition(!confirmed("🍋苹果，青柠"))      // text appeared at a different position
+    precondition(confirmed("🍋青柠，苹果"))
+    let same = InsertionCheck(value: "一二", selection: NSRange(location: 1, length: 1), count: 2)
+    precondition(!same.confirms("二", valueAfter: "一二", caret: same.selection, countAfter: 2) { _ in nil })
+    precondition(same.confirms("二", valueAfter: "一二", caret: NSRange(location: 2, length: 0), countAfter: 2) { _ in nil })
+
+    let rich = InsertionCheck(value: "前🌿后", selection: nil, count: nil)
+    precondition(rich.confirms("测试", valueAfter: "前测试后", caret: nil, countAfter: nil) { _ in nil })
+    precondition(!rich.confirms("前", valueAfter: "前🌿错", caret: nil, countAfter: nil) { _ in nil })
+    let ranged = InsertionCheck(value: nil, selection: NSRange(location: 1, length: 0), count: 2)
+    let end = NSRange(location: 3, length: 0)
+    precondition(!ranged.confirms("输入", valueAfter: nil, caret: end, countAfter: 4) { _ in nil })
+    precondition(ranged.confirms("输入", valueAfter: nil, caret: end, countAfter: 4) {
+        $0 == NSRange(location: 1, length: 2) ? "输入" : nil
+    })
+}
+
 private final class Fixture: URLProtocol {
     override class func canInit(with request: URLRequest) -> Bool { true }
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
@@ -57,7 +81,8 @@ enum RegressionChecks {
     static func main() async throws {
         singleTapTogglesOnlyOnRelease()
         interruptedChordDoesNotToggleAndNextTapWorks()
+        confirmsOnlyTheExpectedEdit()
         try await claudeCompletesOrRejectsUnusableResults()
-        print("Passed standalone tap, chord interruption, cleanup, rejection and truncation checks.")
+        print("Passed standalone tap, chord interruption, insertion confirmation, cleanup, rejection and truncation checks.")
     }
 }

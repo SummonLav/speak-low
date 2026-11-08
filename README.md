@@ -2,7 +2,7 @@
 
 <img src="Resources/Brand/speak-low.svg" width="280" alt="小小惊叹气泡与 speak anything 字标">
 
-Mac 上的离线语音输入。把光标放进输入框，按一下右侧 **Option（⌥）** 开始说话，再按一下，把文字写回光标。按 **Esc** 取消。
+Mac 上的离线语音输入。把光标放进输入框，按一下右侧 **Option（⌥）** 开始说话，再按一下，把文字写回光标。按 **Esc** 取消。开始录音时会听到轻快的上行双音，结束时是下行双音。
 
 <img src="docs/images/recording.png" width="148" alt="录音时屏幕底部出现气泡和计时器">
 
@@ -15,7 +15,7 @@ Mac 上的离线语音输入。把光标放进输入框，按一下右侧 **Opti
 open dist/speak-low.app
 ```
 
-首次构建会下载 Whisper 模型。打开 App，允许「麦克风」和「辅助功能」，等模型就绪即可听写。菜单栏的气泡可以打开设置，也可以在文字未写入时复制上次结果。
+首次构建会下载 Whisper 模型。打开 App，允许「麦克风」和「辅助功能」，等模型就绪即可听写。看到「已输入」表示已在原输入框中确认写入。若提示「未确认写入」，可从菜单栏气泡选择「复制上次结果」。
 
 <img src="docs/images/settings.png" width="400" alt="speak-low 设置窗口，可选择识别语言并开启听写权限">
 

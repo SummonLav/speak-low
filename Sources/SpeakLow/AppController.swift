@@ -3,7 +3,7 @@ import AVFoundation
 import SwiftUI
 
 enum Phase {
-    case loading, unavailable, idle, recording, recognizing, cleaning, cancelling
+    case loading, unavailable, idle, recording, recognizing, cleaning, inserting, cancelling
 }
 
 @MainActor
@@ -15,6 +15,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, Obse
     @Published private(set) var hasShortcut = false
     private let engine = SpeechEngine()
     private let mic = Microphone()
+    private let sounds = DictationSounds()
     private let shortcut = ShortcutMonitor()
     private let hud = VoicePanel()
     private var item: NSStatusItem!
@@ -131,7 +132,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, Obse
         if phase == .idle || phase == .recording {
             add(phase == .recording ? "结束听写" : "开始听写", #selector(toggle), to: menu)
         }
-        if activeID != nil { add("取消本次听写", #selector(cancel), to: menu) }
+        if activeID != nil && phase != .inserting { add("取消本次听写", #selector(cancel), to: menu) }
         if phase == .unavailable { add("重新载入模型", #selector(hydrate), to: menu) }
         if !lastText.isEmpty { add("复制上次结果", #selector(copyLast), to: menu) }
         menu.addItem(.separator())
@@ -164,7 +165,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, Obse
         case .idle: begin()
         case .recording: finish()
         case .loading, .unavailable: notice(message)
-        case .recognizing, .cleaning, .cancelling: break
+        case .recognizing, .cleaning, .inserting, .cancelling: break
         }
     }
 
@@ -182,6 +183,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, Obse
             notice(error.localizedDescription)
             return
         }
+        sounds.started()
         activeID = UUID()
         shortcut.handlesEscape = true
         recordingStart = Date()
@@ -195,6 +197,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, Obse
             cancel()
             return
         }
+        sounds.stopped()
         inFlightAudio = audio
         setPhase(.recognizing, "正在本地转写…")
         hud.update(icon: "waveform", text: "正在转写…")
@@ -221,8 +224,11 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, Obse
                 }
                 guard activeID == id else { return }
                 lastText = text
-                let inserted = TextInsertion.insert(text, into: target)
-                let delivery = inserted ? "已输入" : "请从菜单栏复制上次结果"
+                shortcut.handlesEscape = false
+                setPhase(.inserting, "正在写入光标…")
+                hud.update(icon: "text.cursor", text: "正在写入光标…")
+                let confirmed = await TextInsertion.insert(text, into: target)
+                let delivery = confirmed ? "已输入" : "未确认写入 · 从菜单栏复制上次结果"
                 endSession()
                 if let fallback {
                     notice("\(delivery) · 已用本地稿", detail: "\(delivery) · 已用本地稿（\(fallback)）")
@@ -236,11 +242,13 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate, Obse
     }
 
     @objc func cancel() {
-        guard activeID != nil else { return }
+        guard activeID != nil, phase != .inserting else { return }
+        let wasRecording = phase == .recording
         activeID = nil
         shortcut.handlesEscape = false
         target = nil
         mic.discard()
+        if wasRecording { sounds.stopped() }
         if let pending = job {
             pending.cancel()
             setPhase(.cancelling, "正在取消…")

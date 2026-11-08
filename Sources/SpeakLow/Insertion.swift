@@ -36,6 +36,8 @@ struct WritingTarget {
 
     private static func browserEditor(_ app: NSRunningApplication) -> Bool {
         let id = app.bundleIdentifier ?? ""
+        // Codex ships Chromium as Codex Framework, including in the ChatGPT-branded app.
+        if id == "com.openai.codex" { return true }
         if ["com.google.Chrome", "com.apple.Safari", "com.microsoft.edgemac", "com.brave.Browser",
             "org.mozilla.firefox", "company.thebrowser.Browser", "com.electron."].contains(where: { id.hasPrefix($0) }) {
             return true
@@ -44,7 +46,7 @@ struct WritingTarget {
         return FileManager.default.fileExists(atPath: bundle.appendingPathComponent("Contents/Frameworks/Electron Framework.framework").path)
     }
 
-    private static func selectedRange(_ field: AXUIElement) -> NSRange? {
+    fileprivate static func selectedRange(_ field: AXUIElement) -> NSRange? {
         guard let value = attr(field, kAXSelectedTextRangeAttribute),
               CFGetTypeID(value) == AXValueGetTypeID() else { return nil }
         var range = CFRange()
@@ -61,7 +63,7 @@ struct WritingTarget {
         if field.map(isEditable) != true {
             prepare(app)
             field = element(node, kAXFocusedUIElementAttribute)
-            if field == nil, let global = element(AXUIElementCreateSystemWide(), kAXFocusedUIElementAttribute) {
+            if field.map(isEditable) != true, let global = element(AXUIElementCreateSystemWide(), kAXFocusedUIElementAttribute) {
                 var owner = pid_t(0)
                 if AXUIElementGetPid(global, &owner) == .success && owner == app.processIdentifier { field = global }
             }
@@ -103,13 +105,61 @@ enum TextInsertion {
         if !previous.items.isEmpty { board.writeObjects(previous.items) }
     }
 
-    static func insert(_ text: String, into target: WritingTarget?) -> Bool {
-        guard let target, target.stillFocused() else { return false }
-        if !target.prefersPaste, settable(target.field, kAXSelectedTextAttribute),
-           AXUIElementSetAttributeValue(target.field, kAXSelectedTextAttribute as CFString, text as CFString) == .success {
-            return true
+    private static func string(in field: AXUIElement, range: NSRange) -> String? {
+        var span = CFRange(location: range.location, length: range.length)
+        guard let param = AXValueCreate(.cfRange, &span) else { return nil }
+        var result: CFTypeRef?
+        guard AXUIElementCopyParameterizedAttributeValue(field, kAXStringForRangeParameterizedAttribute as CFString,
+                                                         param, &result) == .success else { return nil }
+        return result as? String
+    }
+
+    private static func confirm(_ text: String, in target: WritingTarget, before: InsertionCheck) async -> Bool {
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: .seconds(2))
+        repeat {
+            let field = target.field
+            if before.confirms(text, valueAfter: attr(field, kAXValueAttribute) as? String,
+                               caret: WritingTarget.selectedRange(field),
+                               countAfter: attr(field, kAXNumberOfCharactersAttribute) as? Int,
+                               readRange: { string(in: field, range: $0) }) { return true }
+            if Task.isCancelled { return false }
+            try? await Task.sleep(for: .milliseconds(70))
+        } while clock.now < deadline
+        return false
+    }
+
+    // Use the application's standard Paste action when available. This enters
+    // Chromium's editing pipeline just like Edit > Paste, independent of keyboard layout.
+    private static func pasteCommand(in pid: pid_t) -> AXUIElement? {
+        let app = AXUIElementCreateApplication(pid)
+        guard let bar = element(app, kAXMenuBarAttribute),
+              let menus = attr(bar, kAXChildrenAttribute) as? [AXUIElement] else { return nil }
+        for menu in menus where ["Edit", "编辑", "編輯"].contains(attr(menu, kAXTitleAttribute) as? String ?? "") {
+            guard let contents = (attr(menu, kAXChildrenAttribute) as? [AXUIElement])?.first,
+                  let commands = attr(contents, kAXChildrenAttribute) as? [AXUIElement] else { continue }
+            return commands.first {
+                (attr($0, kAXMenuItemCmdCharAttribute) as? String)?.uppercased() == "V" &&
+                (attr($0, kAXMenuItemCmdModifiersAttribute) as? Int) == 0 &&
+                (attr($0, kAXEnabledAttribute) as? Bool) == true
+            }
         }
-        // Some editors expose a text field but only accept a normal Paste command.
+        return nil
+    }
+
+    static func insert(_ text: String, into target: WritingTarget?) async -> Bool {
+        guard !text.isEmpty, let target, target.stillFocused() else { return false }
+        let before = InsertionCheck(value: attr(target.field, kAXValueAttribute) as? String,
+                                    selection: target.selection,
+                                    count: attr(target.field, kAXNumberOfCharactersAttribute) as? Int)
+        if !target.prefersPaste, settable(target.field, kAXSelectedTextAttribute), target.stillFocused() {
+            let result = AXUIElementSetAttributeValue(target.field, kAXSelectedTextAttribute as CFString, text as CFString)
+            // A timeout can mean delivery took place. Replaying it could duplicate the text.
+            if result == .success || result == .cannotComplete {
+                return await confirm(text, in: target, before: before)
+            }
+        }
+
         guard let source = CGEventSource(stateID: .privateState),
               let down = CGEvent(keyboardEventSource: source, virtualKey: 9, keyDown: true),
               let up = CGEvent(keyboardEventSource: source, virtualKey: 9, keyDown: false) else { return false }
@@ -126,20 +176,29 @@ enum TextInsertion {
             saved.append(clone)
         }
         guard change == pb.changeCount, target.stillFocused() else { return false }
-        pb.clearContents()
+        let cleared = pb.clearContents()
         guard pb.setString(text, forType: .string) else {
-            if !saved.isEmpty { pb.writeObjects(saved) }
+            if pb.changeCount == cleared, !saved.isEmpty { pb.writeObjects(saved) }
             return false
         }
         let owned = pb.changeCount
         previousClipboard = (owned, saved)
+        defer { if previousClipboard?.change == owned { restoreClipboard() } }
+
+        let command = pasteCommand(in: target.pid)
+        guard target.stillFocused(), pb.changeCount == owned else { return false }
+        if let command {
+            AXUIElementSetMessagingTimeout(command, 0.35)
+            let result = AXUIElementPerformAction(command, kAXPressAction as CFString)
+            if result == .success || result == .cannotComplete {
+                return await confirm(text, in: target, before: before)
+            }
+        }
+        guard target.stillFocused(), pb.changeCount == owned else { return false }
         down.flags = .maskCommand
         up.flags = .maskCommand
         down.postToPid(target.pid)
         up.postToPid(target.pid)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
-            if previousClipboard?.change == owned { restoreClipboard() }
-        }
-        return true
+        return await confirm(text, in: target, before: before)
     }
 }
