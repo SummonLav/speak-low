@@ -1,30 +1,49 @@
-# speak-low
+# Skill · 安装与更新 speak-low
 
-<img src="Resources/Brand/speak-low.svg" width="280" alt="小小惊叹气泡与 speak anything 字标">
+收到安装或更新请求时，由 agent 在目标 Mac 上执行以下步骤并打开 App。先检查 `/Applications` 和 `~/Applications` 中的 `speak-low.app`。已有安装走原位更新。若 App 正从其他位置运行，使用该副本的实际路径。
 
-Mac 上的离线语音输入。把光标放进输入框，按一下右侧 **Option（⌥）** 开始说话，再按一下，把文字写回光标。按 **Esc** 取消。提示音将尼龙弦拨音与轻亮的双音叠在一起，开始时上扬，结束时落低。
+### 首次安装
 
-<img src="docs/images/recording.png" width="148" alt="录音时屏幕底部出现气泡和计时器">
-
-## 安装与更新
-
-需要 Apple Silicon Mac、macOS 14+、Swift 5.10+ 和 Python 3.8+。在仓库根目录运行：
+确认是 Apple Silicon Mac，运行 macOS 14+，并备有 Git、Swift 6.0+ 工具链和 Python 3.8+。从 GitHub 的 `main` 构建，脚本会下载并校验 Whisper 模型。若用户已指定固定签名证书，构建前将其指纹设为 `SPEAK_LOW_SIGN_IDENTITY`。由 agent 执行以下命令。
 
 ```sh
-./scripts/build-app.sh /Applications
-open /Applications/speak-low.app
+(
+  set -eu
+  target=/Applications
+  if [ ! -w "$target" ]; then
+    target="$HOME/Applications"
+    mkdir -p "$target"
+  fi
+  src=$(mktemp -d)
+  trap 'rm -rf "$src"' EXIT
+  git clone --depth 1 --branch main https://github.com/SummonLav/speak-low.git "$src"
+  revision=$(git -C "$src" rev-parse HEAD)
+  SPEAK_LOW_BUILD_REVISION="$revision" "$src/scripts/build-app.sh" "$target"
+  open "$target/speak-low.app"
+)
 ```
 
-以后从菜单栏打开「设置」，点 **检查更新**。App 会读取私有仓库的 `main`，复用本机模型构建新版，并在听写结束后原位替换、重新打开。更新需要本机的 GitHub CLI 已通过 `gh auth login` 登录有仓库访问权的账号。
+### 原位更新
 
-默认使用临时签名，更新后 macOS 可能要求重新授权。若要保留授权，首次用固定证书构建时设置 `SPEAK_LOW_SIGN_IDENTITY` 为钥匙串中代码签名证书的指纹，再为这个签名版本授权一次。之后点「检查更新」会沿用证书，并在安装前验证新版是否符合原 App 的签名要求。
+1. 在目标 Mac 上运行 `gh api repos/SummonLav/speak-low/commits/main --jq .sha`，记下目标提交。若缺少 GitHub CLI，用现有包管理器安装（Homebrew 命令为 `brew install gh`）。需要登录时运行 `gh auth login --hostname github.com --web`，由账户持有人完成 GitHub 验证后继续。
+2. 打开已安装的 App，由 agent 在菜单栏气泡 → **设置…** 中点 **检查更新**。保持 App 运行，更新器会复用模型和现有签名配置，等当前听写结束后替换并重新打开。
+3. 看到「已是最新版」或「已更新到最新版」后，用以下命令核对提交。将 `app` 设为实际安装路径。若构建失败，检查 `~/Library/Logs/speak-low/update.log`。
 
-首次构建会下载 Whisper 模型。打开 App，允许「麦克风」和「辅助功能」，等模型就绪即可听写。看到「已输入」表示已在原输入框中确认写入。若提示「未确认写入」，可从菜单栏气泡选择「复制上次结果」。
+```sh
+app=/Applications/speak-low.app
+/usr/bin/plutil -extract SpeakLowRevision raw "$app/Contents/Info.plist"
+```
 
-<img src="docs/images/settings.png" width="400" alt="speak-low 设置窗口，可选择识别语言并开启听写权限">
+**就绪检查**　确认菜单栏显示「本地模型就绪」，设置中的「麦克风」和「辅助功能」均为「已授权」。若缺权限，由 agent 打开对应面板，仅在 macOS 要求本人同意或验证身份时交给用户。默认使用临时签名，更新后可能需要再次授权。
 
-## 可选的 Claude 整理
+## 使用
 
-在设置里粘贴自己的 Anthropic API Key，保存后开启「启用文字整理」。默认使用 Claude Sonnet 4.5，可修改模型 ID。Claude 可以合并断词、补标点。仅转写文字会发给 Anthropic，费用由你的 API 账户承担，调用失败时使用本地稿。
+<img src="Resources/Brand/speak-low.svg" width="250" alt="speak anything 字标">
 
-<img src="docs/images/claude-model.png" width="400" alt="浅色模式下的 Claude 设置，模型 ID 使用中性灰选中高亮">
+把光标放进输入框，按一下右 **Option（⌥）** 开始听写，再按一下结束并写入，**Esc** 取消。若显示「未确认写入」，可从菜单栏选择「复制上次结果」。
+
+默认由本机 Whisper 离线转写。可选的 Claude 整理会合并断词、补标点。在设置中填入 Anthropic API Key、保存并开启「启用文字整理」。默认使用 Sonnet 4.5，仅发送转写文字，按该账户计费。调用失败时使用本地稿。
+
+<img src="docs/images/recording.png" width="148" alt="听写计时气泡">
+
+<img src="docs/images/settings.png" width="320" alt="听写与权限设置"> <img src="docs/images/claude-model.png" width="320" alt="Claude 模型设置">
