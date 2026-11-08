@@ -23,7 +23,12 @@ fi
 if [[ -n "$revision" ]]; then
     /usr/bin/plutil -insert SpeakLowRevision -string "$revision" "$app/Contents/Info.plist"
 fi
-identity="${SPEAK_LOW_SIGN_IDENTITY:-${OPTIONVOICE_SIGN_IDENTITY:--}}"
+previous_plist="$out/speak-low.app/Contents/Info.plist"
+identity="${SPEAK_LOW_SIGN_IDENTITY:-${OPTIONVOICE_SIGN_IDENTITY:-}}"
+if [[ -z "$identity" && -f "$previous_plist" ]]; then
+    identity="$(/usr/bin/plutil -extract SpeakLowSigningIdentity raw "$previous_plist" 2>/dev/null)" || identity=""
+fi
+identity="${identity:--}"
 if [[ "$identity" != "-" ]]; then
     /usr/bin/plutil -insert SpeakLowSigningIdentity -string "$identity" "$app/Contents/Info.plist"
 fi

@@ -81,7 +81,17 @@ def prepare(installed, directory, commit):
     if (new.get("CFBundleIdentifier") != current["CFBundleIdentifier"]
             or new.get(REVISION_KEY) != commit):
         raise ValueError("新版 App 的身份或版本与预期不符。")
-    subprocess.run(["/usr/bin/codesign", "--verify", "--strict", "--deep", candidate], check=True)
+    verify = ["/usr/bin/codesign", "--verify", "--strict", "--deep"]
+    if current.get("SpeakLowSigningIdentity"):
+        # macOS records the old app's designated requirement when the user grants access.
+        original = subprocess.check_output(["/usr/bin/codesign", "-d", "-r-", installed],
+                                           stderr=subprocess.DEVNULL, text=True)
+        requirement = re.search(r"^#? ?designated => (.+)$", original, re.MULTILINE)
+        if not requirement or subprocess.run(verify + ["-R=" + requirement[1], candidate],
+                                             stderr=subprocess.DEVNULL).returncode:
+            raise ValueError("新版未通过原签名身份校验，已保留当前版本。")
+    else:
+        subprocess.run(verify + [candidate], check=True)
 
 
 def exchange(first, second):
