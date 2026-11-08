@@ -1,4 +1,10 @@
-# Skill · 安装与更新 speak-low
+# <img src="Resources/Brand/speak-low.svg" width="250" alt="speak-low · speak anything">
+
+speak-low 是一款 Mac 本地听写工具，按右侧 Option 键就能把说的话转成文字，写到光标处。
+
+<img src="docs/images/settings.png" width="320" alt="带有 speak anything 标志的深色听写设置窗口">
+
+## Skill · 安装与更新
 
 收到安装或更新请求时，由 agent 在目标 Mac 上执行以下步骤并打开 App。先检查 `/Applications` 和 `~/Applications` 中的 `speak-low.app`。已有安装走原位更新。若 App 正从其他位置运行，使用该副本的实际路径。
 
@@ -38,12 +44,8 @@ app=/Applications/speak-low.app
 
 ## 使用
 
-<img src="Resources/Brand/speak-low.svg" width="250" alt="speak anything 字标">
-
 把光标放进输入框，按一下右 **Option（⌥）** 开始听写，再按一下结束并写入，**Esc** 取消。若显示「未确认写入」，可从菜单栏选择「复制上次结果」。
 
 默认由本机 Whisper 离线转写。可选的 Claude 整理会合并断词、补标点。在设置中填入 Anthropic API Key、保存并开启「启用文字整理」。默认使用 Sonnet 4.5，仅发送转写文字，按该账户计费。调用失败时使用本地稿。
 
 <img src="docs/images/recording.png" width="148" alt="听写计时气泡">
-
-<img src="docs/images/settings.png" width="320" alt="听写与权限设置"> <img src="docs/images/claude-model.png" width="320" alt="Claude 模型设置">
