@@ -125,8 +125,12 @@
   }
   function expression(mood,fill,features) {
     if(mood==='smile') return line('M60 42L60 49M78 40L78 47',6.2,features) + line('M58 61Q70 68 82 56',5.1,features);
-    if(mood==='gasp') return line('M47 42L46 48M64 44L63 50',6.2,features) +
-      path('M53 55C69 55 67 72 54 72C39 72 39 55 53 55Z',features) + path('M53 60C60 59 62 66 55 67C48 67 47 61 53 60Z',fill);
+    if(mood==='gasp') {
+      const featuresMarkup = line('M47 42L46 48M64 44L63 50',6.2,features) +
+        path('M53 55C69 55 67 72 54 72C39 72 39 55 53 55Z',features) +
+        path('M53 60C60 59 62 66 55 67C48 67 47 61 53 60Z',fill);
+      return group('translate(-5.95528 -0.73122) translate(55 55.5) scale(1.35) translate(-55 -55.5)',featuresMarkup);
+    }
     return line('M39 40Q43 47 48 40M58 39Q62 46 67 39',4.8,features) + line('M45 55Q52 62 61 54',4.3,features);
   }
   function drawMascot(id,dark=false,changes) {
