@@ -1,4 +1,4 @@
-# speak low
+<h1 align="center">speak low</h1>
 
 <img src="Resources/Brand/speak-low.svg" width="140" height="60" alt="speak anything"><br>
 Mac 本地听写工具，轻按右侧 Option 键，把说的话写到光标处。
