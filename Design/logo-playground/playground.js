@@ -5,8 +5,10 @@
   const indexOf = design => designs.indexOf(design);
   const pad = n => String(n).padStart(2,'0');
   const icon = name => '<svg class="icon" aria-hidden="true"><use href="#i-'+name+'"/></svg>';
-  let filter='all', word='speak-low', dark=false;
+  const options = new URLSearchParams(location.search);
+  let word=options.get('word')==='anything'?'speak anything':'speak-low', dark=false;
   let active = designs.find(d => '#'+d.id === location.hash) || designs[0];
+  let filter=options.get('series')===active.family?active.family:'all';
   const listed = () => designs.filter(d => filter==='all' || d.family===filter);
   const surface = () => $('#proof-board').dataset.dark = String(dark);
 
@@ -50,8 +52,12 @@
   function choose(design) {
     if(!design)return;
     active=design;
-    if(location.hash!=='#'+design.id) {
-      try { history.replaceState(null,'','#'+design.id); } catch { location.hash=design.id; }
+    const url = new URL(location.href);
+    if (word==='speak anything') url.searchParams.set('word','anything'); else url.searchParams.delete('word');
+    if (filter!=='all') url.searchParams.set('series',filter); else url.searchParams.delete('series');
+    url.hash=design.id;
+    if (url.href!==location.href) {
+      try { history.replaceState(null,'',url.href); } catch { location.hash=design.id; }
     }
     display();
   }
@@ -82,7 +88,7 @@
   });
   $('.word-picker').addEventListener('click',e=>{
     const b=e.target.closest('button[data-word]'); if(!b)return;
-    word=b.dataset.word;renderCatalog();display();
+    word=b.dataset.word;renderCatalog();choose(active);
   });
   $('#export').addEventListener('click',()=>{
     const blob=new Blob([svg(active,{kind:'logo',word})],{type:'image/svg+xml;charset=utf-8'});
@@ -110,5 +116,6 @@
     if(!listed().includes(target))changeFilter('all');
     choose(target);
   });
+  document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===filter)));
   renderCatalog();display();
 })();
