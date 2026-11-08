@@ -6,14 +6,16 @@ Mac 上的离线语音输入。把光标放进输入框，按一下右侧 **Opti
 
 <img src="docs/images/recording.png" width="148" alt="录音时屏幕底部出现气泡和计时器">
 
-## 安装
+## 安装与更新
 
 需要 Apple Silicon Mac、macOS 14+、Swift 5.10+ 和 Python 3.8+。在仓库根目录运行：
 
 ```sh
-./scripts/build-app.sh
-open dist/speak-low.app
+./scripts/build-app.sh /Applications
+open /Applications/speak-low.app
 ```
+
+以后更新时，从菜单栏退出 speak-low，在 `main` 分支运行 `git pull --ff-only`，再执行上面两行即可原位更新。有代码签名证书时，可通过 `SPEAK_LOW_SIGN_IDENTITY` 指定固定签名身份，以便 macOS 沿用授权。
 
 首次构建会下载 Whisper 模型。打开 App，允许「麦克风」和「辅助功能」，等模型就绪即可听写。看到「已输入」表示已在原输入框中确认写入。若提示「未确认写入」，可从菜单栏气泡选择「复制上次结果」。
 

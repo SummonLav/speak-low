@@ -24,11 +24,18 @@ swift scripts/make-icon.swift "$stage/Icon.iconset" "$resources/Brand"
 iconutil -c icns "$stage/Icon.iconset" -o "$resources/speak-low.icns"
 codesign --force --sign "${SPEAK_LOW_SIGN_IDENTITY:-${OPTIONVOICE_SIGN_IDENTITY:--}}" "$app"
 codesign --verify --strict --deep "$app"
-if [[ -e "$out/speak-low.app" ]]; then
-    mv "$out/speak-low.app" "$stage/previous.app"
-fi
-if ! mv "$app" "$out/speak-low.app"; then
-    if [[ -d "$stage/previous.app" ]]; then mv "$stage/previous.app" "$out/speak-low.app"; fi
-    exit 1
-fi
+# Staging in the target directory keeps both bundles on the same volume.
+# An exchange leaves the current app intact if the update is interrupted.
+swift - "$app" "$out/speak-low.app" <<'SWIFT'
+import Darwin
+
+let staged = CommandLine.arguments[1]
+let destination = CommandLine.arguments[2]
+if renamex_np(staged, destination, UInt32(RENAME_EXCL)) != 0 {
+    guard errno == EEXIST, renamex_np(staged, destination, UInt32(RENAME_SWAP)) == 0 else {
+        perror("Could not install speak-low")
+        exit(1)
+    }
+}
+SWIFT
 echo "$out/speak-low.app"
