@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f7f7">
+<title>Logo Playground · speak-low</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath fill='%23191919' d='M3 10Q3 4 10 4h20q7 0 7 7v14q0 6-7 6H17l-9 6 1-6q-6 0-6-7z'/%3E%3Cpath d='M15 14v2m10-2v2m-11 5q6 6 12-1' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="playground.css">
+<script defer src="marks.js"></script><script defer src="playground.js"></script>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon-bank" aria-hidden="true">
+  <symbol id="i-bubble" viewBox="0 0 32 32"><path fill="currentColor" d="M3 9q0-5 6-5h15q6 0 6 6v10q0 6-6 6h-9l-8 5 1-6q-5 0-5-6z"/><g fill="none" stroke="var(--base,#f7f7f7)" stroke-width="2.2" stroke-linecap="round"><path d="M12 11v2m8-2v2m-9 5q4.5 4 9-1"/></g></symbol>
+  <symbol id="i-git" viewBox="0 0 24 24"><path stroke="none" fill="currentColor" d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.55.1.76-.24.76-.53v-2.14c-3.08.67-3.73-1.31-3.73-1.31-.5-1.28-1.23-1.62-1.23-1.62-1.01-.7.08-.68.08-.68 1.12.08 1.7 1.15 1.7 1.15.99 1.7 2.59 1.2 3.22.91.1-.72.39-1.21.7-1.49-2.46-.28-5.05-1.23-5.05-5.49 0-1.21.44-2.2 1.15-2.98-.12-.28-.5-1.41.11-2.94 0 0 .93-.3 3.06 1.14A10.61 10.61 0 0 1 12 6.18c.94 0 1.89.12 2.78.38 2.12-1.44 3.05-1.14 3.05-1.14.61 1.53.23 2.66.11 2.94.72.78 1.14 1.77 1.14 2.98 0 4.27-2.6 5.21-5.08 5.49.4.35.75 1.03.75 2.08V22c0 .29.2.64.77.53A11.1 11.1 0 0 0 12 .9z"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m10 6 6 6-6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 15A9 9 0 0 1 9 4a8.5 8.5 0 1 0 11 11z"/></symbol>
+</svg>
+<header class="bar">
+  <div class="wrap bar-inner">
+    <a class="brand" href="#paper-chatter" aria-label="speak-low 标识首页"><svg class="brand-mark" aria-hidden="true"><use href="#i-bubble"/></svg><span>speak-low</span></a>
+    <span class="divider"></span><span class="studio-name">Design studio</span>
+    <a class="repo" href="https://github.com/SummonLav/speak-low" target="_blank" rel="noopener noreferrer"><svg class="icon"><use href="#i-git"/></svg><span>项目仓库</span><svg class="icon arrow-out"><use href="#i-out"/></svg></a>
+  </div>
+</header>
+<main class="wrap">
+  <div class="mast">
+    <div><h1>Logo <em>Playground</em><span class="heading-dot" aria-hidden="true">.</span></h1><p>为 speak-low 设计的六款标识提案。</p></div>
+    <button id="export" class="export" type="button"><svg class="icon"><use href="#i-download"/></svg>导出 SVG</button>
+  </div>
+  <div class="workspace">
+    <section class="selected" aria-label="当前标识预览">
+      <div class="section-head"><h2><span class="live-dot" aria-hidden="true"></span>当前预览</h2><span id="family" class="family-label"></span></div>
+      <figure id="plate" class="plate"><div id="drawing"></div><i class="crop tl"></i><i class="crop tr"></i><i class="crop bl"></i><i class="crop br"></i></figure>
+      <div class="caption">
+        <div class="caption-text" aria-live="polite"><div class="names"><h3 id="name"></h3><em id="english"></em></div><p id="note"></p></div>
+        <div class="navigation"><button class="round" id="previous" type="button" aria-label="上一个提案"><svg class="icon"><use href="#i-left"/></svg></button><span class="counter" id="counter"></span><button class="round" id="next" type="button" aria-label="下一个提案"><svg class="icon"><use href="#i-right"/></svg></button></div>
+      </div>
+      <fieldset id="copy-options" hidden><legend>气泡旁的字标</legend><div class="word-picker"><button type="button" data-word="speak-low">speak-low</button><button type="button" data-word="speak anything">speak anything</button></div></fieldset>
+    </section>
+    <aside class="collection" aria-label="提案目录">
+      <div class="section-head catalog-head"><h2>提案目录</h2><div class="filters" aria-label="按系列筛选"><button data-filter="all" aria-pressed="true">全部</button><button data-filter="type" aria-pressed="false">字形</button><button data-filter="face" aria-pressed="false">表情</button></div></div>
+      <div id="catalog" class="catalog"></div>
+    </aside>
+  </div>
+  <section class="proofs" aria-label="实际尺寸与标识组合">
+    <div class="section-head"><h2>应用预览</h2><div class="surface-picker" role="group" aria-label="应用预览底色"><button data-surface="light" aria-pressed="true" aria-label="浅色背景" title="浅色背景"><svg class="icon"><use href="#i-sun"/></svg></button><button data-surface="dark" aria-pressed="false" aria-label="深色背景" title="深色背景"><svg class="icon"><use href="#i-moon"/></svg></button></div></div>
+    <div id="proof-board" class="proof-board"><div class="proof-icon"><div class="sizes" id="sizes"></div><span class="proof-label">图标尺寸</span></div><div class="proof-sign"><div id="signature"></div><span class="proof-label">横向标识</span></div><div class="proof-color"><div class="colors" id="colors"></div><span class="proof-label">提案色卡</span></div></div>
+  </section>
+  <div id="status" role="status" aria-live="polite" class="sr"></div>
+</main>
+</body>
+</html>
